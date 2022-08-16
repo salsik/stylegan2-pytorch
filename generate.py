@@ -2,7 +2,7 @@ import argparse
 
 import torch
 from torchvision import utils
-from model import Generator
+#from model import Generator
 from tqdm import tqdm
 
 
@@ -19,8 +19,9 @@ def generate(args, g_ema, device, mean_latent):
 
             utils.save_image(
                 sample,
-                f"sample/{str(i).zfill(6)}.png",
-                nrow=1,
+                f"{args.out}/{str(i).zfill(6)}.png",
+                #nrow=1,
+                nrow =8,
                 normalize=True,
                 range=(-1, 1),
             )
@@ -34,6 +35,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--size", type=int, default=1024, help="output image size of the generator"
     )
+    parser.add_argument('--arch', type=str, default='stylegan2', help='model architectures (stylegan2 | swagan)')
     parser.add_argument(
         "--sample",
         type=int,
@@ -56,6 +58,13 @@ if __name__ == "__main__":
         default="stylegan2-ffhq-config-f.pt",
         help="path to the model checkpoint",
     )
+
+    parser.add_argument(
+        "--out",
+        type=str,
+        default="sample",
+        help="output directory ",
+    )
     parser.add_argument(
         "--channel_multiplier",
         type=int,
@@ -64,6 +73,13 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
+
+
+    if args.arch == 'stylegan2':
+        from model import Generator, Discriminator
+
+    elif args.arch == 'swagan':
+        from swagan import Generator, Discriminator
 
     args.latent = 512
     args.n_mlp = 8

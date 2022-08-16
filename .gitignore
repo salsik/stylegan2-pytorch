@@ -131,3 +131,14 @@ dmypy.json
 wandb/
 *.lmdb/
 *.pkl
+
+
+## alex
+
+.vscode/
+sample*/
+LMDB*/
+checkpoint*/
+logs/
+projecting/
+dining*/

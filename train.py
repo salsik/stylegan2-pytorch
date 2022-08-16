@@ -20,6 +20,9 @@ except ImportError:
 
 
 from dataset import MultiResolutionDataset
+from dataset import LMDBDataset
+
+
 from distributed import (
     get_rank,
     synchronize,
@@ -337,7 +340,7 @@ if __name__ == "__main__":
     parser.add_argument("path", type=str, help="path to the lmdb dataset")
     parser.add_argument('--arch', type=str, default='stylegan2', help='model architectures (stylegan2 | swagan)')
     parser.add_argument(
-        "--iter", type=int, default=800000, help="total training iterations"
+        "--iter", type=int, default=500000, help="total training iterations"
     )
     parser.add_argument(
         "--batch", type=int, default=16, help="batch sizes for each gpus"
@@ -518,6 +521,8 @@ if __name__ == "__main__":
     )
 
     dataset = MultiResolutionDataset(args.path, transform, args.size)
+    
+    #dataset = LMDBDataset(args.path, transform)
     loader = data.DataLoader(
         dataset,
         batch_size=args.batch,

@@ -1,0 +1,349 @@
+
+
+
+
+alex readme and commands
+
+
+
+here we use control gan environmnet 
+
+
+source activate controlgan
+
+
+prepare data
+
+
+python prepare_data.py --out LMDB_PATH --n_worker 16 --size 32,64 /home/atsumilab/alex/data/thumbs
+
+
+python prepare_data.py --out LMDB_PATH2 --n_worker 32 --size 256 /home/atsumilab/alex/data/thumbnails128/
+ 
+
+
+python prepare_data.py --out LMDB_PATH1024 --n_worker 32 --size 256 /home/atsumilab/alex/data/thumbnails1024
+
+
+
+python prepare_data.py --out LMDB_PATH1024_100 --n_worker 32 --size 256 /home/atsumilab/alex/data/images_100*1024
+
+
+train data
+
+python -m torch.distributed.launch --nproc_per_node=4 --master_port=PORT train.py --batch 16 LMDB_PATH
+
+
+python -m torch.distributed.launch --nproc_per_node=4 --master_port=1235 train.py --batch 4 LMDB_PATH2
+
+
+run swagan 
+
+python -m torch.distributed.launch --nproc_per_node=4 --master_port=1235 train.py --arch swagan --batch 4 LMDB_PATH2
+
+
+
+run fid score 
+
+
+python -m pytorch_fid path/to/dataset1 path/to/dataset2  --device cuda:4
+
+
+python -m pytorch_fid  /home/atsumilab/alex/data/thumbnails128/thumbnails128x128 sample_30k_samples  --device cuda:4
+
+FID:  424.2792654042144
+
+python -m pytorch_fid  /home/atsumilab/alex/data/thumbnails128/thumbnails128x128 sample_300_generated_from30k --device cuda:4
+
+FID:  376.3601166489198
+
+
+
+python generate.py --sample 10 --pics 10 --ckpt PATH_CHECKPOINT  --arch swagan
+
+
+python generate.py --sample 64 --pics 300 --ckpt checkpoint\ 30k\ iters/020000.pt  --size 256
+
+
+python generate.py --sample 64 --pics 300   --size 256 --ckpt checkpoint
+
+
+
+check last 3 4 runs
+
+
+
+
+
+python generate.py --sample 1 --pics 1 --size 256 --ckpt checkpoint\ 30k\ iters/020000.pt 
+| 0/1 [00:00<?, ?it/s]/home/atsumilab/alex/stylegans/stylegan2-pytorch/op/conv2d_gradfix.py:89
+
+100%|| 1/1 [00:00<00:00, 16.28it/s]
+██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:06<00:00,  6.92s/it]
+python generate.py --sample 1 --pics 1 --size 256 --ckpt checkpoint/550000.pt  
+
+python generate.py --sample 1 --pics 300 --size 256 --ckpt checkpoint/550000.pt 
+  0%|    | 0/300 [00:00<?, ?it/s]
+  
+100%|██| 300/300 [00:13<00:00, 21.49it/s]
+
+
+python -m pytorch_fid  /home/atsumilab/alex/data/thumbnails128/thumbnails128x128 sample --device cuda:2
+100%|█| 1400/1400 [01:43<00:00, 13.58it/s]
+100%|█| 6/6 [00:01<00:00,  5.48it/s]
+FID:  81.94737405998814
+
+ python generate.py --sample 1 --pics 5500 --size 256 --ckpt checkpoint/550000.pt 
+  
+100%|██| 5500/5500 [04:16<00:00, 21.44it/s]
+
+
+python -m pytorch_fid  /home/atsumilab/alex/data/thumbnails128/thumbnails128x128 sample --device cuda:2
+100%|███| 1400/1400 [01:43<00:00, 13.55it/s]
+100%|███| 110/110 [00:09<00:00, 11.56it/s]
+FID:  34.203206019670176
+
+python generate.py --sample 1 --pics 70001 --size 256 --ckpt checkpoint/550000.pt 
+  0%|                                                                                                                                       | 0/70001 [00:00<?, ?it/s]/home/atsumilab/alex/stylegans/stylegan2-pytorch/op/conv2d_gradfix.py:89: UserWarning: conv2d_gradfix not supported on PyTorch 1.11.0+cu102. Falling back to torch.nn.functional.conv2d().
+ 
+100%|███████| 70001/70001 [53:49<00:00, 21.68it/s]
+
+python -m pytorch_fid  /home/atsumilab/alex/data/thumbnails128/thumbnails128x128 sample --device cuda:2
+100%|████| 1400/1400 [01:43<00:00, 13.51it/s]
+100%|██| 1401/1401 [01:54<00:00, 12.20it/s]
+FID:  31.19915098319541
+
+
+python -m pytorch_fid  /home/atsumilab/alex/data/thumbnails1024/256/ sample --device cuda:2
+100%|█████| 1400/1400 [02:43<00:00,  8.55it/s]
+100%|█████| 1401/1401 [04:20<00:00,  5.37it/s]
+FID:  4.124803551642856
+
+
+
+
+python projector.py --ckpt [CHECKPOINT] --size [GENERATOR_OUTPUT_SIZE] FILE1
+
+python projector.py --ckpt che --size 256 sample
+
+
+
+
+python projector.py --ckpt [CHECKPOINT] --size [GENERATOR_OUTPUT_SIZE] FILE1
+
+
+
+
+-----------------------------------------------------
+
+lsun training
+
+
+
+
+ python prepare_data.py --out '/data1/data_alex/lsun/lsun_code/exported_dining_128lmdb' --n_worker 32 --size 128 '/data1/data_alex/lsun/lsun_code/exported_dining'
+
+
+
+kitchen dataset
+
+/data1/data_alex/lsun/kitchen_train/kitchen_train_lmdb/
+
+
+/data1/data_alex/lsun/dining_room_train_lmdb
+
+
+python -m torch.distributed.launch --nproc_per_node=4 --master_port=1235 train.py --batch 4 /data1/data_alex/lsun/dining_room_train_lmdb
+
+'/data1/data_alex/lsun/lsun_code/exported_dining'
+
+
+
+should change datasize to the  full size instead of 1000 and copy datat  to data  place
+
+
+python -m torch.distributed.launch --nproc_per_node=4 --master_port=1235 train.py --batch 4  --size 128  dining_128/
+
+
+
+
+
+python generate.py --sample 1 --pics 100000 --size 128 --ckpt checkpoint/200000.pt --out '/data1/data_alex/generated/sample_dining128_train10k'  
+
+
+
+python -m pytorch_fid  '/data1/data_alex/lsun/lsun_code/exported_dining_128all_in/' '/data1/data_alex/generated/sample_dining128_train10k'  --device cuda
+
+
+
+
+
+
+
+
+
+to be able to compare and evaluate using this fid ,
+
+i had to convert the dining data of lsun from lmdb to webm first by runnig export file from lsun 
+  python3 data.py export <image db path> --out_dir <output directory>
+
+
+then convert the webm to png by editing the file of prepare data and use function 
+resize_and_save_tofolder
+instead of resize_and_convert inside it .. do not for get to return it back
+we stpo this function after converting 100k images to be able to cvompare it with the generated 100k images from stylegan checlpoint
+this function save images in the folder "exported_dining_128all_in" initialized in the prepare_data file itself 
+after that we compare it with the generated images from stylegan GENERATOr
+genration is applied using  checkoint 200000  (should try more trained chkp )
+
+
+python generate.py --sample 1 --pics 100000 --size 128 --ckpt checkpoint/200000.pt --out '/data1/data_alex/generated/sample_dining128_train10k'  
+
+
+and the fid script is:
+
+
+ python -m pytorch_fid  '/data1/data_alex/lsun/lsun_code/exported_dining_128all_in/' '/data1/data_alex/generated/sample_dining128_train10k'  --device cuda
+100%|██████████| 1999/1999 [02:28<00:00, 13.43it/s]
+100%|██████████| 2000/2000 [02:29<00:00, 13.38it/s]
+FID:  16.893063893745023
+
+///////////////////////////////////////////////////
+
+now continue trainng to 500k iter to check fid again
+
+ python -m torch.distributed.launch --nproc_per_node=4 --master_port=1235 train.py --batch 2 --size 128 --ckpt checkpoint/200000.pt  dining_128/
+
+Total records: (100001, 100000)
+/home/atsumilab/alex/stylegans/stylegan2-pytorch/op/conv2d_gradfix.py:89: UserWarning: conv2d_gradfix not supported on PyTorch 1.11.0+cu102. Falling back to torch.nn.functional.conv2d().
+  f"conv2d_gradfix not supported on PyTorch {torch.__version__}. Falling back to torch.nn.functional.conv2d()."
+/home/atsumilab/alex/stylegans/stylegan2-pytorch/op/conv2d_gradfix.py:89: UserWarning: conv2d_gradfix not supported on PyTorch 1.11.0+cu102. Falling back to torch.nn.functional.conv2d().
+  f"conv2d_gradfix not supported on PyTorch {torch.__version__}. Falling back to torch.nn.functional.conv2d()."
+Total records: (100001, 100000)
+ 40%|█     | 200000/500000 [00:00<?, ?it/s]Total records: (100001, 100000)
+
+d: 1.1324; g: 0.7472; r1: 0.0083; path: 0.0472; mean path: 0.0021; augment: 0.0000:  40%|███  | 200000/500000 [00:00<?, ?it/s]/home/atsumilab/anaconda3/envs/controlgan/lib/python3.7/site-packages/torchvision/utils.py:64: UserWarning: The parameter 'range' is deprecated since 0.12 and will be removed in 0.14. Please use 'value_range' instead.
+"The parameter 'range' is deprecated since 0.12 and will be removed in 0.14. "
+d: 1.1244; g: 0.9336; r1: 0.0310; path: 0.0031; mean path: 0.2428; augment: 0.0000:  50%|█  | 252171/500000 [4:05:09<19:44:03,  3.d: 1.1244; g: 0.9336; r1: 0.0310; path: 0.0031; mean path: 0.2428; augment: 0.0000:  50%|███████████████▏              | 252172/500000 [4:05:09<19:42:01,  3.d: 1.2077; g: 0.8461; r1: 0.0310; path: 0.0004; mean path: 0.2427; augment: 0.0000:  50%|███████████▌           | 252172/500000 [4:05:10<19:42:01,  3.49it/s]d: 1.2217; g: 1.2317; r1: 0.0158; path: 0.0012; mean path: 0.2370; augment: 0.0000: 100%|█████████████████████████| 500000/500000 [23:36:56<00:00,  3.60it/s]Done!
+Done!
+Done!
+d: 1.1400; g: 0.5584; r1: 0.0133; path: 0.0008; mean path: 0.2369; augment: 0.0000: : 500001it [23:36:59,  3.36it/s]                                         Done!
+d: 1.1400; g: 0.5584; r1: 0.0133; path: 0.0008; mean path: 0.2369; augment: 0.0000: : 500001it [23:36:59,  3.53it/s]
+
+
+
+
+
+
+
+python generate.py --sample 1 --pics 100000 --size 128 --ckpt checkpoint_500k_dining128/500000.pt --out '/data1/data_alex/generated/sample_dining128_train500k'  
+
+
+
+python generate.py --sample 1 --pics 100000 --size 128 --ckpt checkpoint_500k_dining128/350000.pt --out '/data1/data_alex/generated/sample_dining128_train350k/'
+  0%|         | 0/100000 [00:00<?, ?it/s]
+100%|██| 100000/100000 [25:59<00:00, 64.14it/s]
+
+
+
+
+python -m pytorch_fid  '/data1/data_alex/lsun/lsun_code/exported_dining_128all_in/' '/data1/data_alex/generated/sample_dining128_train10k'  --device cuda
+
+
+
+
+
+
+python -m pytorch_fid  '/data1/data_alex/lsun/lsun_code/exported_dining_128all_in/'
+ '/data1/data_alex/generated/sample_dining128_train500k/'  --device cuda:1
+100%|██████| 1999/1999 [27:03<00:00,  1.23it/s]
+100%|███████| 2000/2000 [09:37<00:00,  3.46it/s]
+FID:  8.994263140026902
+
+
+python -m pytorch_fid  '/data1/data_alex/lsun/lsun_code/exported_dining_128all_in/'
+ '/data1/data_alex/generated/sample_dining128_train350k/'  --device cuda
+100%|█████| 1999/1999 [13:00<00:00,  2.56it/s]
+100%|████| 2000/2000 [07:57<00:00,  4.19it/s]
+FID:  10.47855265861881
+
+
+
+python -m pytorch_fid  '/data1/data_alex/lsun/lsun_code/exported_dining_128all_in/'
+ '/data1/data_alex/generated/sample_dining128_train250k/'  --device cuda
+100%|███| 1999/1999 [13:23<00:00,  2.49it/s]
+100%|█████| 2000/2000 [09:04<00:00,  3.67it/s]
+FID:  12.995653405832712
+
+
+  # with 100 k is as follow
+ python -m pytorch_fid  '/data1/data_alex/lsun/lsun_code/exported_dining_128all_in/'
+  '/data1/data_alex/generated/sample_dining128_train10k'  --device cuda
+100%|██████████| 1999/1999 [02:28<00:00, 13.43it/s]
+100%|██████████| 2000/2000 [02:29<00:00, 13.38it/s]
+FID:  16.893063893745023
+
+
+
+
+
+
+
+
+
+ python -m pytorch_fid  '/data1/data_alex/generated/sample_dining128_train250k/'
+  '/data1/data_alex/generated/sample_dining128_train500k/'  --device cuda
+100%|█████| 2000/2000 [08:52<00:00,  3.76it/s]
+100%|█████| 2000/2000 [08:13<00:00,  4.05it/s]
+FID:  4.263228466651782
+
+
+
+python -m pytorch_fid  '/data1/data_alex/generated/sample_dining128_train350k/' 
+'/data1/data_alex/generated/sample_dining128_train250k/'  --device cuda
+100%|█████████| 2000/2000 [07:51<00:00,  4.24it/s]
+100%|█████████| 2000/2000 [08:39<00:00,  3.85it/s]
+FID:  3.7371387863011023
+
+
+ python -m pytorch_fid  '/data1/data_alex/generated/sample_dining128_train350k/' 
+ '/data1/data_alex/generated/sample_dining128_train500k/'  --device cuda
+100%|████| 2000/2000 [08:03<00:00,  4.14it/s]
+100%|████| 2000/2000 [08:32<00:00,  3.90it/s]
+FID:  2.9313437626461507
+
+
+
+
+
+
+
+after that we try to generate kitchen images and try to check the fid again and search for editing ..
+
+
+
+------------------------------------------------------
+
+
+
+kitchen training
+
+python data.py export "/data1/data_alex/lsun/kitchen_train_lmdb" --out_dir exported_kitchen
+Exporting /data1/data_alex/lsun/kitchen_train_lmdb to exported_kitchen
+
+
+prepare the data, 
+
+we use the function of converting and saving to new image
+
+
+python prepare_data.py --out '/data1/data_alex/lsun/lsun_code/exported_kitchen_256lmdb' --n_worker 32 --size 256 '/data1/data_alex/lsun/lsun_code/exported_kitchen'
+
+
+579108it [15:29:14, 13.27it/s]
+
+
+
+
+
+
