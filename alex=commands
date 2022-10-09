@@ -246,6 +246,9 @@ python generate.py --sample 1 --pics 100000 --size 128 --ckpt checkpoint_500k_di
 
 
 
+ '/data1/data_alex/generated/sample_kitchen256_train500k'
+
+
 
 python -m pytorch_fid  '/data1/data_alex/lsun/lsun_code/exported_dining_128all_in/' '/data1/data_alex/generated/sample_dining128_train10k'  --device cuda
 
@@ -254,11 +257,23 @@ python -m pytorch_fid  '/data1/data_alex/lsun/lsun_code/exported_dining_128all_i
 
 
 
+  # with 100 k is as follow
+ python -m pytorch_fid  '/data1/data_alex/lsun/lsun_code/exported_dining_128all_in/'
+  '/data1/data_alex/generated/sample_dining128_train10k'  --device cuda
+100%|██████████| 1999/1999 [02:28<00:00, 13.43it/s]
+100%|██████████| 2000/2000 [02:29<00:00, 13.38it/s]
+FID:  16.893063893745023
+
+
+
+
 python -m pytorch_fid  '/data1/data_alex/lsun/lsun_code/exported_dining_128all_in/'
- '/data1/data_alex/generated/sample_dining128_train500k/'  --device cuda:1
-100%|██████| 1999/1999 [27:03<00:00,  1.23it/s]
-100%|███████| 2000/2000 [09:37<00:00,  3.46it/s]
-FID:  8.994263140026902
+ '/data1/data_alex/generated/sample_dining128_train250k/'  --device cuda
+100%|███| 1999/1999 [13:23<00:00,  2.49it/s]
+100%|█████| 2000/2000 [09:04<00:00,  3.67it/s]
+FID:  12.995653405832712
+
+
 
 
 python -m pytorch_fid  '/data1/data_alex/lsun/lsun_code/exported_dining_128all_in/'
@@ -270,18 +285,28 @@ FID:  10.47855265861881
 
 
 python -m pytorch_fid  '/data1/data_alex/lsun/lsun_code/exported_dining_128all_in/'
- '/data1/data_alex/generated/sample_dining128_train250k/'  --device cuda
-100%|███| 1999/1999 [13:23<00:00,  2.49it/s]
-100%|█████| 2000/2000 [09:04<00:00,  3.67it/s]
-FID:  12.995653405832712
+ '/data1/data_alex/generated/sample_dining128_train500k/'  --device cuda:1
+100%|██████| 1999/1999 [27:03<00:00,  1.23it/s]
+100%|███████| 2000/2000 [09:37<00:00,  3.46it/s]
+FID:  8.994263140026902
 
 
-  # with 100 k is as follow
- python -m pytorch_fid  '/data1/data_alex/lsun/lsun_code/exported_dining_128all_in/'
-  '/data1/data_alex/generated/sample_dining128_train10k'  --device cuda
-100%|██████████| 1999/1999 [02:28<00:00, 13.43it/s]
-100%|██████████| 2000/2000 [02:29<00:00, 13.38it/s]
-FID:  16.893063893745023
+
+python -m pytorch_fid  '/data1/data_alex/lsun/lsun_code/exported_dining_128all_in/'
+ '/data1/data_alex/generated/sample_dining128_train700k/'  --device cuda
+100%|█████████| 1999/1999 [02:29<00:00, 13.37it/s]
+100%|███| 2000/2000 [02:30<00:00, 13.33it/s]
+
+FID:  6.869835365207706
+
+
+
+python -m pytorch_fid  '/data1/data_alex/lsun/lsun_code/exported_dining_128all_in/'
+ '/data1/data_alex/generated/sample_dining128_train900k/'  --device cuda
+100%|█████████| 1999/1999 [02:29<00:00, 13.37it/s]
+100%|███| 2000/2000 [02:30<00:00, 13.33it/s]
+FID:  6.048852811096992
+
 
 
 
@@ -318,6 +343,12 @@ FID:  2.9313437626461507
 
 
 
+python generate.py --sample 1 --pics 100000 --size 128 --ckpt checkpoint_500k_dining128/700000.pt --out '/data1/data_alex/generated/sample_dining128_train700k'
+
+
+
+
+
 after that we try to generate kitchen images and try to check the fid again and search for editing ..
 
 
@@ -344,6 +375,24 @@ python prepare_data.py --out '/data1/data_alex/lsun/lsun_code/exported_kitchen_2
 
 
 
+----------------------------------------------
+
+check the noise issue that was deleted from original rosinality pytorch code
+check git commit of alex experinces
+
+---------------------------------------------------------
+train to 800k instead of 500k 
+train kitchen data on swagan, since kitchen data is 256
+
+As noted in the paper, SWAGAN trains much faster. (About ~2x at 256px.)
+
+python -m torch.distributed.launch --nproc_per_node=2 --master_port=1235 train.py --arch swagan --batch 4 LMDB_PATH2
 
 
 
+
+
+python generate.py --sample 1 --pics 2200000 --ckpt checkpoint/500000.pt --out '/data1/data_alex/generated/sample_kitchen256_train500k' --arch 'swagan'
+
+
+python generate2.py --sample 1 --pics 2200000 --ckpt checkpoint/800000.pt --out '/data1/data_alex/generated/sample_kitchen256_train800k' --arch 'swagan'

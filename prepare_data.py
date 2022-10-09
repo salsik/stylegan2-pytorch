@@ -24,7 +24,7 @@ def resize_and_save_tofolder(img,file, size, resample, quality=100):
     # create new file  with the previous name added the resized size and same extension and file name
 
     #folder_name = (file.split("/")[-3]
-    folder_name = '/data1/data_alex/lsun/lsun_code/kitchen256all_in/'
+    folder_name = '/data1/data_alex/lsun/lsun_code/kitchen256all_inn/'
     # to save before converting
      
     file_name = file.split("/")[-1]

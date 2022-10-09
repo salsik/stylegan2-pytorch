@@ -11,6 +11,7 @@ def generate(args, g_ema, device, mean_latent):
     with torch.no_grad():
         g_ema.eval()
         for i in tqdm(range(args.pics)):
+            i= i+ 288705
             sample_z = torch.randn(args.sample, args.latent, device=device)
 
             sample, _ = g_ema(
@@ -19,7 +20,7 @@ def generate(args, g_ema, device, mean_latent):
 
             utils.save_image(
                 sample,
-                f"{args.out}/{str(i).zfill(6)}.png",
+                f"{args.out}/{str(i).zfill(8)}.png",
                 #nrow=1,
                 nrow =8,
                 normalize=True,
